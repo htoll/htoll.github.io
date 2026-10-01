@@ -754,10 +754,10 @@ figcaption {
   <section class="section" id="contact" aria-labelledby="contact-h">
     <h2 id="contact-h">Contact</h2>
     <div>
-      <p id="contact-lede">The best way to reach me is a message on LinkedIn.</p>
+      <p>Send me a message here, or reach me on LinkedIn.</p>
       <!-- CONTACT FORM: Formspree forwards each message to my inbox, so no email address ever appears on this page.
-           The form stays hidden until YOUR_FORM_ID below is replaced with the form ID from formspree.io. -->
-      <form class="contact-form" id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" hidden>
+           Messages and spam settings are in the formspree.io dashboard. -->
+      <form class="contact-form" id="contact-form" action="https://formspree.io/f/myezadko" method="POST">
         <div class="field">
           <label for="cf-name">Name</label>
           <input id="cf-name" name="name" type="text" autocomplete="name" required>
@@ -798,27 +798,27 @@ figcaption {
       else if (img.naturalWidth) show();
     });
 
-    // Contact form: hidden until a Formspree form ID is filled in, then sends without leaving the page.
+    // Contact form: sends without leaving the page. If Formspree won't take a background
+    // submission (for example while its reCAPTCHA is on), submit normally so its page can finish it.
     var form = document.getElementById("contact-form");
-    if (form && form.getAttribute("action").indexOf("YOUR_FORM_ID") === -1) {
+    if (form) {
       var status = form.querySelector(".form-status");
       var button = form.querySelector("button");
-      form.hidden = false;
-      document.getElementById("contact-lede").textContent = "Send me a message here, or reach me on LinkedIn.";
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         button.disabled = true;
         status.textContent = "Sending…";
         fetch(form.action, { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } })
           .then(function (r) {
-            if (!r.ok) throw new Error(r.status);
+            if (!r.ok) return form.submit();
             form.reset();
             status.textContent = "Thanks, your message was sent.";
+            button.disabled = false;
           })
           .catch(function () {
             status.textContent = "Sorry, that didn’t send. Please try again, or message me on LinkedIn.";
-          })
-          .then(function () { button.disabled = false; });
+            button.disabled = false;
+          });
       });
     }
 
